@@ -1550,15 +1550,216 @@
 #             st.session_state.ats = gemini(improved)
 #             st.session_state.ats_score = extract_ats_score(st.session_state.ats)
 #             st.session_state.skill_gap = gemini(improved)
+# import streamlit as st
+# import os
+# import re
+# from dotenv import load_dotenv
+# from google import genai
+# from firecrawl import FirecrawlApp
+
+# # ----------------------------
+# # 1. ENV SETUP
+# # ----------------------------
+# load_dotenv()
+
+# GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+# FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
+
+# if not GOOGLE_API_KEY or not FIRECRAWL_API_KEY:
+#     st.error("❌ Missing API keys in .env")
+#     st.stop()
+
+# # ----------------------------
+# # 2. CLIENTS
+# # ----------------------------
+# genai_client = genai.Client(
+#     api_key=GOOGLE_API_KEY,
+#     http_options={"api_version": "v1"}
+# )
+
+# firecrawl = FirecrawlApp(api_key=FIRECRAWL_API_KEY)
+
+# # ----------------------------
+# # 3. HELPERS
+# # ----------------------------
+# def gemini(prompt):
+#     return genai_client.models.generate_content(
+#         model="gemini-2.5-flash",
+#         contents=prompt
+#     ).text.strip()
+
+# def extract_ats_score(text):
+#     match = re.search(r"ATS_SCORE:\s*(\d+)", text)
+#     return int(match.group(1)) if match else 0
+
+# def calculate_ats(resume, jd):
+#     return gemini(f"""
+# You are an ATS system.
+
+# Return ONLY:
+
+# ATS_SCORE: <0-100>
+# MISSING_KEYWORDS: comma-separated
+# SUGGESTIONS:
+# - suggestion 1
+# - suggestion 2
+# - suggestion 3
+
+# RESUME:
+# {resume}
+
+# JOB DESCRIPTION:
+# {jd}
+# """)
+
+# # ----------------------------
+# # 4. UI
+# # ----------------------------
+# st.set_page_config("Resume Agent", "🤖")
+# st.title("🤖 Agentic Resume Tailor (ATS Optimized)")
+
+# job_url = st.text_input("🔗 Job Link (optional)")
+# job_desc_manual = st.text_area("📋 Paste Job Description (recommended)", height=250)
+
+# st.caption("💡 Manual JD always takes priority")
+
+# # ----------------------------
+# # 5. STATE
+# # ----------------------------
+# if "resume" not in st.session_state:
+#     st.session_state.resume = None
+# if "ats" not in st.session_state:
+#     st.session_state.ats = None
+# if "score" not in st.session_state:
+#     st.session_state.score = None
+# if "jd" not in st.session_state:
+#     st.session_state.jd = None
+
+# # ----------------------------
+# # 6. TAILOR BUTTON
+# # ----------------------------
+# if st.button("🚀 Tailor Resume"):
+
+#     if not os.path.exists("master_resume.txt"):
+#         st.error("❌ master_resume.txt not found")
+#         st.stop()
+
+#     with open("master_resume.txt", "r", encoding="utf-8") as f:
+#         master_resume = f.read()
+
+#     # Resolve JD
+#     if job_desc_manual.strip():
+#         jd = job_desc_manual.strip()
+#     elif job_url.strip():
+#         try:
+#             scraped = firecrawl.scrape_url(job_url)
+#             jd = scraped.get("markdown") or scraped.get("content", "")
+#         except Exception:
+#             st.error("❌ Scraping failed. Paste JD manually.")
+#             st.stop()
+#     else:
+#         st.error("❌ Paste JD or provide link")
+#         st.stop()
+
+#     st.session_state.jd = jd
+
+#     with st.spinner("Optimizing resume..."):
+#         tailored = gemini(f"""
+# You are an expert ATS resume writer.
+
+# GOAL:
+# Create a 1–2 PAGE resume (MAX 700 words).
+
+# RULES:
+# - Keep ONLY experience relevant to the job
+# - Internally score bullets: High / Medium / Low relevance
+# - Keep High, limited Medium, drop Low
+# - Max 4–5 bullets per role
+# - Compress older roles
+# - Do NOT hallucinate
+# - Preserve company, title, dates
+
+# RESUME:
+# {master_resume}
+
+# JOB DESCRIPTION:
+# {jd}
+
+# OUTPUT:
+# Final optimized resume only.
+# """)
+
+#     # Safety compression
+#     if len(tailored.split()) > 720:
+#         tailored = gemini(f"""
+# Compress this resume to under 700 words
+# without losing ATS keywords.
+
+# RESUME:
+# {tailored}
+# """)
+
+#     ats = calculate_ats(tailored, jd)
+#     score = extract_ats_score(ats)
+
+#     st.session_state.resume = tailored
+#     st.session_state.ats = ats
+#     st.session_state.score = score
+
+# # ----------------------------
+# # 7. OUTPUT
+# # ----------------------------
+# if st.session_state.resume:
+#     st.success("✅ Resume Generated")
+
+#     st.markdown("## 📄 Tailored Resume")
+#     st.markdown(st.session_state.resume)
+
+#     st.markdown("---")
+#     st.markdown("## 📊 ATS Match")
+#     st.markdown(st.session_state.ats)
+#     st.metric("ATS Score", f"{st.session_state.score}/100")
+
+# # ----------------------------
+# # 8. IMPROVE BUTTON
+# # ----------------------------
+# if st.session_state.score and st.session_state.score < 90:
+#     if st.button("🔥 Improve ATS to 90+"):
+
+#         with st.spinner("Improving resume further..."):
+#             improved = gemini(f"""
+# Improve this resume to achieve ATS score above 90.
+
+# RULES:
+# - Stay under 700 words
+# - Add missing keywords naturally
+# - Strengthen impact bullets
+# - Do NOT hallucinate experience
+
+# RESUME:
+# {st.session_state.resume}
+
+# JOB DESCRIPTION:
+# {st.session_state.jd}
+# """)
+
+#             ats2 = calculate_ats(improved, st.session_state.jd)
+#             score2 = extract_ats_score(ats2)
+
+#             st.session_state.resume = improved
+#             st.session_state.ats = ats2
+#             st.session_state.score = score2
+
+#             st.success("🎯 Resume Improved")
+
 import streamlit as st
-import os
-import re
 from dotenv import load_dotenv
+import os
 from google import genai
 from firecrawl import FirecrawlApp
 
 # ----------------------------
-# 1. ENV SETUP
+# 1. Load environment variables
 # ----------------------------
 load_dotenv()
 
@@ -1566,11 +1767,11 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
 
 if not GOOGLE_API_KEY or not FIRECRAWL_API_KEY:
-    st.error("❌ Missing API keys in .env")
+    st.error("❌ API keys missing. Check environment variables.")
     st.stop()
 
 # ----------------------------
-# 2. CLIENTS
+# 2. Initialize clients
 # ----------------------------
 genai_client = genai.Client(
     api_key=GOOGLE_API_KEY,
@@ -1580,175 +1781,128 @@ genai_client = genai.Client(
 firecrawl = FirecrawlApp(api_key=FIRECRAWL_API_KEY)
 
 # ----------------------------
-# 3. HELPERS
+# 3. Helper: ATS + Skill Gap
 # ----------------------------
-def gemini(prompt):
-    return genai_client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    ).text.strip()
+def calculate_ats_and_skill_gap(resume_text, job_desc):
+    prompt = f"""
+You are an ATS and Hiring Manager.
 
-def extract_ats_score(text):
-    match = re.search(r"ATS_SCORE:\s*(\d+)", text)
-    return int(match.group(1)) if match else 0
+Return:
+1. ATS Match Score (0–100)
+2. Missing skills / gaps
+3. 3 concrete improvement actions
 
-def calculate_ats(resume, jd):
-    return gemini(f"""
-You are an ATS system.
+FORMAT STRICTLY AS:
 
-Return ONLY:
-
-ATS_SCORE: <0-100>
-MISSING_KEYWORDS: comma-separated
-SUGGESTIONS:
-- suggestion 1
-- suggestion 2
-- suggestion 3
+ATS_SCORE: <number>
+SKILL_GAPS:
+- gap 1
+- gap 2
+- gap 3
+IMPROVEMENTS:
+- improvement 1
+- improvement 2
+- improvement 3
 
 RESUME:
-{resume}
+{resume_text}
 
 JOB DESCRIPTION:
-{jd}
-""")
+{job_desc}
+"""
+    response = genai_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+    return response.text
 
 # ----------------------------
-# 4. UI
+# 4. Streamlit UI
 # ----------------------------
-st.set_page_config("Resume Agent", "🤖")
-st.title("🤖 Agentic Resume Tailor (ATS Optimized)")
+st.set_page_config(page_title="Agentic Resume Tailor", page_icon="🤖")
+st.title("🤖 Agentic Resume Tailor (Public Version)")
+
+resume_text = st.text_area(
+    "📄 Paste Your Resume",
+    height=350,
+    placeholder="Paste your resume content here..."
+)
 
 job_url = st.text_input("🔗 Job Link (optional)")
-job_desc_manual = st.text_area("📋 Paste Job Description (recommended)", height=250)
+job_desc_manual = st.text_area(
+    "📋 Or paste Job Description",
+    height=250
+)
 
-st.caption("💡 Manual JD always takes priority")
-
-# ----------------------------
-# 5. STATE
-# ----------------------------
-if "resume" not in st.session_state:
-    st.session_state.resume = None
-if "ats" not in st.session_state:
-    st.session_state.ats = None
-if "score" not in st.session_state:
-    st.session_state.score = None
-if "jd" not in st.session_state:
-    st.session_state.jd = None
+st.caption("You can provide **either** a job link **or** paste the job description.")
 
 # ----------------------------
-# 6. TAILOR BUTTON
+# 5. Tailor Resume
 # ----------------------------
 if st.button("🚀 Tailor Resume"):
 
-    if not os.path.exists("master_resume.txt"):
-        st.error("❌ master_resume.txt not found")
+    if not resume_text.strip():
+        st.error("❌ Resume is required.")
         st.stop()
 
-    with open("master_resume.txt", "r", encoding="utf-8") as f:
-        master_resume = f.read()
+    my_resume = resume_text
 
-    # Resolve JD
+    # Resolve Job Description
+    job_desc = ""
+
     if job_desc_manual.strip():
-        jd = job_desc_manual.strip()
+        job_desc = job_desc_manual
+
     elif job_url.strip():
         try:
             scraped = firecrawl.scrape_url(job_url)
-            jd = scraped.get("markdown") or scraped.get("content", "")
+            job_desc = (
+                scraped.get("markdown") or scraped.get("content")
+                if isinstance(scraped, dict)
+                else getattr(scraped, "markdown", "") or getattr(scraped, "content", "")
+            )
+            if not job_desc.strip():
+                raise Exception("Empty JD")
+
         except Exception:
-            st.error("❌ Scraping failed. Paste JD manually.")
+            st.error("❌ Unable to extract Job Description. Please paste it manually.")
             st.stop()
     else:
-        st.error("❌ Paste JD or provide link")
+        st.error("❌ Provide Job Link or Job Description.")
         st.stop()
 
-    st.session_state.jd = jd
+    # Resume Tailoring
+    with st.spinner("Tailoring resume..."):
+        resume_prompt = f"""
+You are a senior resume strategist.
 
-    with st.spinner("Optimizing resume..."):
-        tailored = gemini(f"""
-You are an expert ATS resume writer.
-
-GOAL:
-Create a 1–2 PAGE resume (MAX 700 words).
-
-RULES:
-- Keep ONLY experience relevant to the job
-- Internally score bullets: High / Medium / Low relevance
-- Keep High, limited Medium, drop Low
-- Max 4–5 bullets per role
-- Compress older roles
-- Do NOT hallucinate
-- Preserve company, title, dates
+Rewrite the resume to match the job description.
+Rules:
+- Max 1–2 pages
+- Only relevant experience
+- ATS optimized
+- No hallucination
 
 RESUME:
-{master_resume}
+{my_resume}
 
 JOB DESCRIPTION:
-{jd}
+{job_desc}
+"""
+        resume_response = genai_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=resume_prompt
+        )
 
-OUTPUT:
-Final optimized resume only.
-""")
+        tailored_resume = resume_response.text
 
-    # Safety compression
-    if len(tailored.split()) > 720:
-        tailored = gemini(f"""
-Compress this resume to under 700 words
-without losing ATS keywords.
-
-RESUME:
-{tailored}
-""")
-
-    ats = calculate_ats(tailored, jd)
-    score = extract_ats_score(ats)
-
-    st.session_state.resume = tailored
-    st.session_state.ats = ats
-    st.session_state.score = score
-
-# ----------------------------
-# 7. OUTPUT
-# ----------------------------
-if st.session_state.resume:
-    st.success("✅ Resume Generated")
-
+    st.success("✅ Tailored Resume Ready")
     st.markdown("## 📄 Tailored Resume")
-    st.markdown(st.session_state.resume)
+    st.markdown(tailored_resume)
 
+    # ATS + Skill Gap
     st.markdown("---")
-    st.markdown("## 📊 ATS Match")
-    st.markdown(st.session_state.ats)
-    st.metric("ATS Score", f"{st.session_state.score}/100")
+    st.markdown("## 📊 ATS Score & Skill Gap")
 
-# ----------------------------
-# 8. IMPROVE BUTTON
-# ----------------------------
-if st.session_state.score and st.session_state.score < 90:
-    if st.button("🔥 Improve ATS to 90+"):
-
-        with st.spinner("Improving resume further..."):
-            improved = gemini(f"""
-Improve this resume to achieve ATS score above 90.
-
-RULES:
-- Stay under 700 words
-- Add missing keywords naturally
-- Strengthen impact bullets
-- Do NOT hallucinate experience
-
-RESUME:
-{st.session_state.resume}
-
-JOB DESCRIPTION:
-{st.session_state.jd}
-""")
-
-            ats2 = calculate_ats(improved, st.session_state.jd)
-            score2 = extract_ats_score(ats2)
-
-            st.session_state.resume = improved
-            st.session_state.ats = ats2
-            st.session_state.score = score2
-
-            st.success("🎯 Resume Improved")
-
+    ats_output = calculate_ats_and_skill_gap(tailored_resume, job_desc)
+    st.markdown(ats_output)

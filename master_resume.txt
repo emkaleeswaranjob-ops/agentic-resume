@@ -1,0 +1,157 @@
+Kaleeswaran Murugan
+Bengaluru, Karnataka•9600170446•emkaleeswaran.job@gmail.com•linkedin.com/in/easwaryem
+IT Project Manager
+Experienced IT Project Manager with over seven years of expertise in managing complex projects across
+Enterprise Risk Management, ISMS, PIMS, and Data Analysis. Proven track record of successfully leading
+cross-functional teams and collaborating with global clients across regions including the U.S., Europe,
+Southeast Asia, Africa, and the Middle East to deliver technology-driven solutions on time and within
+scope.
+SKILLS
+Agile  &  Waterfall  Methodologies, Data  Analysis, Enterprise  Risk  Management, Information  Security  
+Management, Leadership  and  Stakeholder  Management, PIMS, Release  Management, Requirements  
+Management, Wireframing
+Software: Azure  Devops, Figma, Jira, MS  Project, Power  Apps, Power  Automate, Power  BI, SQL, Visio
+CERTIFICATIONS
+PMP (Trained)
+PMI
+Safe Agilist 6.0
+Scaled Agile
+CSPO
+Scrum Alliance
+PSM
+Scrum.org
+Gen AI for Project Managers
+PMI
+Agile Project Management
+Google
+ISO 27001:2022 Lead Auditor
+Pricoris
+ISO 27701:2019 Lead Implementor
+Pricoris
+ISO 31000:2018 Lead Implementor
+Pricoris
+WORK EXPERIENCE
+PwC India
+IT Project Manager – SAP HR Migration Project (Pharma Client, Singapore)
+08/2022 - Present
+• Led end-to-end migration of SAP ECC 6.0 HCM, Payroll, and Time Tracking modules to Workday (HCM),
+Mercans (Payroll), and XPHR (Time Tracking) for a pharmaceutical client operating across four legal
+entities in Singapore, including vaccine and pharma manufacturing sites.
+• Managed cross-functional teams and coordinated with business stakeholders, third-party vendors,
+and geographic locations to ensure seamless transition with minimal disruption to HR and payroll
+operations.
+• Developed and executed comprehensive project plans, including scope definition, risk assessment,
+resource allocation, and timeline management, adhering to regulatory compliance and internal
+quality standards.
+• Oversaw data migration strategy and validation processes to ensure accurate and secure transfer of
+employee master data, payroll records, and time tracking information from legacy SAP systems to new
+platforms.
+• Facilitated workshops and training sessions for HR, payroll, and operations teams to build user adoption
+of Workday, Mercans payroll system, and XPHR time tracking solution.
+• Implemented governance frameworks and status reporting mechanisms for project tracking, issue
+resolution, and stakeholder communication across all four legal entities and manufacturing locations.
+• Coordinated integration testing and User Acceptance Testing (UAT) with stakeholders to validate
+system functionality, compliance with Singapore labor laws, and alignment with pharmaceutical
+industry standards.
+• Ensured smooth cutover and go-live activities, including contingency planning and post-migration
+support to stabilize operations and address any post-implementation issues promptly.
+• Collaborated with compliance and audit teams to document processes and controls necessary for
+regulatory audits specific to the pharma and vaccine manufacturing industry.
+• Delivered the project on schedule and within budget, enabling the client to leverage modern cloud
+based HR and payroll solutions for enhanced efficiency and scalability
+Product Owner - HCM Product (FMCG Client, India)
+Bangalore Urban, Karnataka, India
+• Led cross-functional teams to customize HRMS product for leading FMCG client, achieving a 30%
+improvement in data accuracy and a 75% decrease in payroll processing time through automation
+and system integration, optimizing decision-making and cost-efficiency.
+• Singlehandedly developed Power Apps for the client, enabling streamlined submission, approval,
+monitoring, and reporting of design requests.
+• Streamlined onboarding procedures by introduction of Aadhaar based KYC, leading to a 1.6% decrease
+in fraudulent onboarding which saved 7.2 crore annually.
+• Revamped the exit management process resulted in accurate attrition reports and saving 2.4 crores
+for the organization by auto exit of inactive employee codes.
+• Identified and implemented system functionalities that reduced direct database modifications by 90%,
+thereby enhancing data accuracy and reliability.
+• Managed L2 and L3 support teams, leveraging Power BI to create KPI dashboards for performance
+monitoring and stakeholder reporting. Achieved a 15% reduction in team SLA violations and boosted
+CSAT by 23%.
+• Boosted development team's velocity by 18% through personalized agile coaching, resulting in
+improved project delivery timelines and increased productivity.
+Project Manager (FMCG Client, Bangladesh)
+Bengaluru, Karnataka, India
+• Efficiently managed the deployment of a software ecosystem with six products, meeting a stringent
+deadline and boosting client satisfaction for leading FMCG client.
+• Successfully identified and mitigated project risks, implementing effective risk management strategies
+to safeguard against disruptions, resulting in a 15% reduction in project delays and ensuring on-time
+project delivery.
+• Enhanced project success rate through implementation of industry best practices. Developed and
+maintained comprehensive project documentation, such as status reports , RACI documents and
+performance metrics, ensuring transparency and accountability.
+• Developed Power BI dashboards integrating JIRA data to provide stakeholders with real-time project
+performance insights
+Jocata
+05/2022 - 08/2022
+Associate Senior Business Analyst
+Hyderabad, Telangana, India
+• Spearheaded the implementation of digital lending projects in banking, overseeing business
+requirement analysis, project scope definition, and seamless execution within established timelines,
+Mediterranean Shipping Company
+Senior Business Analyst (Global Governance team)
+11/2018 - 04/2022
+Chennai, Tamil Nadu, India
+• Led global implementation of ERP across 12 countries, coordinating business personnel training and
+executing end-to-end tasks from requirement gathering to UAT testing and BRS documentation.
+• Audit Dashboard Project - Successfully recovered $2 million in pending recovery charges through an
+audit dashboard built using Power BI.
+• As Product Owner for MDM domain in a Freight Forwarding Project. Developed a mobile application for
+Quotation and sales monitoring, achieving an 85% reduction in quotation time per booking.
+Spearheaded initiatives resulting in a 15% increase in sales team performance
+• Robotic Process Automation Project- RPA Automated the 'Telex release process' in Germany and Turkey,
+handling 100 to 150 telexes daily and resulting in a monthly time savings of 150 hours. Implemented
+automation for 'Arrival notice,' achieving a time savings of nearly 30 hours per week. Automated 'Pre
+UAC and UAC reports,' streamlining the generation of 2000 to 2500 reports annually.
+• Chatbots Project - Produced KB documents and articles to enrich the chatbot knowledge base.
+Performed testing and enhanced B.E in search functionality for chatbots. Implemented proactive
+measures resulting in a 20% decrease in SNOW incidents over the past year.
+• EDI Implementation Project - Executed Customs XML - EDI integration in Ireland and Turkey, meeting
+critical deadlines and ensuring seamless compliance. Prevented substantial fines for the agency by
+implementing timely and effective customs solutions.
+EDUCATION
+B.E in Civil Engineering
+Government College of Technology, Coimbatore
+AWARDS & SCHOLARSHIPS
+Culture Catalyst - Champion
+PwC
+Above and Beyond - Individual Category
+PwC
+Certificate of Appreciation for CSR Volunteering
+PwC
+Client Appreciation Award
+PwC
+Best Employee Award
+Mediterranean Shipping company
+Recepient of Prime Minister Scholarship
+Government College of Technology
+VOLUNTEERING & LEADERSHIP
+PwC
+CSR Activity
+Coimbatore•05/2012 - 12/2016
+09/2025
+01/2024
+03/2023
+12/2022
+01/2022
+Bangalore
+• Actively participated as a core team member in organizing sapling plantation drives, contributing to
+environmental sustainability and community engagement initiatives.
+• Engaged regularly in awareness campaigns focused on critical topics such as environmental
+conservation, work-life balance, and stress management targeting students and young adults.
+• Mentored students by providing guidance and support, fostering personal development and
+encouraging positive lifestyle habits.
+• Collaborated with cross-functional teams to design and deliver impactful workshops and sessions
+aimed at educating and empowering the community on health and wellness topics.
+PUBLICATIONS
+Article on Environmental impact on Tissue usage and Food wastage
+• Authored an article on Tissue usage and Food Wastage, published in SPARK magazine, the annual
+publication by MSC distributed across 150+ countries globally, highlighting sustainability and waste
+reduction initiatives.

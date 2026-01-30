@@ -2386,7 +2386,7 @@ with col1:
 with col2:
     st.subheader("🎯 Job Description")
     job_url = st.text_input("Paste Job Link (optional)")
-    job_desc_manual = st.text_area("Or paste Job Description manually", height=300)
+    job_desc_manual = st.text_area("Paste Job Description Manually", height=300)
 
 st.markdown("---")
 
@@ -2461,3 +2461,4 @@ if "tailored_resume" in st.session_state:
                 st.session_state.ats_output = new_ats
                 st.session_state.ats_score = extract_score(new_ats)
                 st.rerun()
+

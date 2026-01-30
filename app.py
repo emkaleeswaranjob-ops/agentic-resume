@@ -2087,163 +2087,377 @@
 
 #     st.markdown(ats_output)
 
+# import streamlit as st
+# import os
+# from dotenv import load_dotenv
+# from google import genai
+# from firecrawl import FirecrawlApp
+
+# # ----------------------------
+# # ENV SETUP
+# # ----------------------------
+# load_dotenv()
+
+# GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+# FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
+
+# if not GOOGLE_API_KEY or not FIRECRAWL_API_KEY:
+#     st.error("❌ Missing API keys in environment variables")
+#     st.stop()
+
+# # ----------------------------
+# # CLIENTS
+# # ----------------------------
+# genai_client = genai.Client(api_key=GOOGLE_API_KEY)
+# firecrawl = FirecrawlApp(api_key=FIRECRAWL_API_KEY)
+
+# # ----------------------------
+# # HELPERS
+# # ----------------------------
+# def truncate_text(text, max_chars=4000):
+#     return text[:max_chars] if len(text) > max_chars else text
+
+
+# def generate_tailored_resume(resume_text, job_desc):
+#     resume_text = truncate_text(resume_text)
+#     job_desc = truncate_text(job_desc)
+
+#     try:
+#         response = genai_client.models.generate_content(
+#             model="gemini-2.5-flash",
+#             contents=[
+#                 {
+#                     "role": "user",
+#                     "parts": [
+#                         {"text": "You are a senior ATS resume strategist."},
+#                         {"text": "Rewrite the resume to best match the job description."},
+#                         {"text": "Rules:"},
+#                         {"text": "- STRICTLY 1–2 pages"},
+#                         {"text": "- Include ONLY relevant experience"},
+#                         {"text": "- Use ATS keywords"},
+#                         {"text": "- No false experience"},
+#                         {"text": "- Professional bullet format"},
+#                         {"text": f"\nRESUME:\n{resume_text}"},
+#                         {"text": f"\nJOB DESCRIPTION:\n{job_desc}"}
+#                     ]
+#                 }
+#             ],
+#             config={
+#                 "max_output_tokens": 800,
+#                 "temperature": 0.4
+#             }
+#         )
+#         return response.text
+
+#     except Exception as e:
+#         return f"❌ Resume generation failed.\n\n{e}"
+
+
+# def calculate_ats_and_skill_gap(resume_text, job_desc):
+#     resume_text = truncate_text(resume_text)
+#     job_desc = truncate_text(job_desc)
+
+#     try:
+#         response = genai_client.models.generate_content(
+#             model="gemini-2.5-flash",
+#             contents=[
+#                 {
+#                     "role": "user",
+#                     "parts": [
+#                         {"text": "You are an ATS system and career coach."},
+#                         {"text": "Analyze the resume against the job description."},
+#                         {"text": "Return ONLY this format:"},
+#                         {"text": "ATS_SCORE: <0-100>"},
+#                         {"text": "MISSING_SKILLS: skill1, skill2"},
+#                         {"text": "SKILL_GAP_INTELLIGENCE:"},
+#                         {"text": "- skill → how to close gap"},
+#                         {"text": f"\nRESUME:\n{resume_text}"},
+#                         {"text": f"\nJOB DESCRIPTION:\n{job_desc}"}
+#                     ]
+#                 }
+#             ],
+#             config={
+#                 "max_output_tokens": 500,
+#                 "temperature": 0.3
+#             }
+#         )
+#         return response.text
+
+#     except Exception as e:
+#         return f"❌ ATS analysis failed.\n\n{e}"
+
+
+# # ----------------------------
+# # STREAMLIT UI
+# # ----------------------------
+# st.set_page_config(page_title="Agentic Resume Tailor", page_icon="🤖")
+# st.title("🤖 Agentic Resume Tailor (ATS-First)")
+
+# resume_input = st.text_area(
+#     "📄 Paste your Resume",
+#     height=300,
+#     placeholder="Paste your full resume here"
+# )
+
+# job_url = st.text_input("🔗 Job Link (optional)")
+# job_desc_manual = st.text_area(
+#     "📋 Job Description (optional)",
+#     height=250
+# )
+
+# st.caption("💡 Paste either Job Link or Job Description")
+
+# # ----------------------------
+# # ACTION
+# # ----------------------------
+# if st.button("🚀 Tailor Resume"):
+#     if not resume_input.strip():
+#         st.error("❌ Please paste your resume")
+#         st.stop()
+
+#     # Resolve JD
+#     job_desc = ""
+#     if job_desc_manual.strip():
+#         job_desc = job_desc_manual
+#     elif job_url.strip():
+#         try:
+#             scraped = firecrawl.scrape_url(job_url)
+#             job_desc = scraped.get("markdown") or scraped.get("content", "")
+#             if not job_desc.strip():
+#                 raise Exception("Empty JD")
+#         except Exception:
+#             st.error("❌ Failed to extract JD. Paste manually.")
+#             st.stop()
+#     else:
+#         st.error("❌ Provide Job Link or Description")
+#         st.stop()
+
+#     # Resume Tailoring
+#     with st.spinner("✍️ Tailoring resume..."):
+#         tailored_resume = generate_tailored_resume(resume_input, job_desc)
+
+#     st.success("✅ Tailored Resume Ready")
+#     st.markdown("## 📄 Tailored Resume")
+#     st.markdown(tailored_resume)
+
+#     # ATS + Skill Gap
+#     with st.spinner("📊 Analyzing ATS & Skill Gaps..."):
+#         ats_output = calculate_ats_and_skill_gap(tailored_resume, job_desc)
+
+#     st.markdown("---")
+#     st.markdown("## 📊 ATS & Skill Gap Intelligence")
+#     st.markdown(ats_output)
+
 import streamlit as st
 import os
 from dotenv import load_dotenv
 from google import genai
 from firecrawl import FirecrawlApp
+import re
 
 # ----------------------------
-# ENV SETUP
+# PAGE CONFIG (SaaS Style)
+# ----------------------------
+st.set_page_config(page_title="AI Resume ATS Optimizer", page_icon="🚀", layout="wide")
+
+st.markdown("""
+<style>
+.block-container {padding-top: 2rem;}
+h1, h2, h3 {font-weight: 600;}
+textarea {font-size: 14px !important;}
+</style>
+""", unsafe_allow_html=True)
+
+# ----------------------------
+# LOAD API KEYS
 # ----------------------------
 load_dotenv()
-
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
 
-if not GOOGLE_API_KEY or not FIRECRAWL_API_KEY:
-    st.error("❌ Missing API keys in environment variables")
+if not GOOGLE_API_KEY:
+    st.error("Missing GOOGLE_API_KEY")
     st.stop()
 
-# ----------------------------
-# CLIENTS
-# ----------------------------
-genai_client = genai.Client(api_key=GOOGLE_API_KEY)
-firecrawl = FirecrawlApp(api_key=FIRECRAWL_API_KEY)
+genai_client = genai.Client(api_key=GOOGLE_API_KEY, http_options={"api_version": "v1"})
+
+firecrawl = None
+if FIRECRAWL_API_KEY:
+    firecrawl = FirecrawlApp(api_key=FIRECRAWL_API_KEY)
 
 # ----------------------------
 # HELPERS
 # ----------------------------
-def truncate_text(text, max_chars=4000):
-    return text[:max_chars] if len(text) > max_chars else text
+def extract_score(text):
+    match = re.search(r"ATS_SCORE:\s*(\d+)", text)
+    return int(match.group(1)) if match else 0
 
+def tailor_resume(resume, jd):
+    prompt = f"""
+You are an elite resume strategist.
 
-def generate_tailored_resume(resume_text, job_desc):
-    resume_text = truncate_text(resume_text)
-    job_desc = truncate_text(job_desc)
+Create a highly targeted resume tailored to the job description.
 
-    try:
-        response = genai_client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[
-                {
-                    "role": "user",
-                    "parts": [
-                        {"text": "You are a senior ATS resume strategist."},
-                        {"text": "Rewrite the resume to best match the job description."},
-                        {"text": "Rules:"},
-                        {"text": "- STRICTLY 1–2 pages"},
-                        {"text": "- Include ONLY relevant experience"},
-                        {"text": "- Use ATS keywords"},
-                        {"text": "- No false experience"},
-                        {"text": "- Professional bullet format"},
-                        {"text": f"\nRESUME:\n{resume_text}"},
-                        {"text": f"\nJOB DESCRIPTION:\n{job_desc}"}
-                    ]
-                }
-            ],
-            config={
-                "max_output_tokens": 800,
-                "temperature": 0.4
-            }
-        )
-        return response.text
+RULES:
+• Keep resume within 1–2 pages
+• Only include relevant experience
+• Use strong bullet points (XYZ format)
+• Insert ATS keywords naturally
+• Do NOT hallucinate
 
-    except Exception as e:
-        return f"❌ Resume generation failed.\n\n{e}"
+RESUME:
+{resume}
 
+JOB DESCRIPTION:
+{jd}
+"""
+    response = genai_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config={"max_output_tokens": 1200}
+    )
+    return response.text
 
-def calculate_ats_and_skill_gap(resume_text, job_desc):
-    resume_text = truncate_text(resume_text)
-    job_desc = truncate_text(job_desc)
+def ats_analysis(resume, jd):
+    prompt = f"""
+You are an ATS system.
 
-    try:
-        response = genai_client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[
-                {
-                    "role": "user",
-                    "parts": [
-                        {"text": "You are an ATS system and career coach."},
-                        {"text": "Analyze the resume against the job description."},
-                        {"text": "Return ONLY this format:"},
-                        {"text": "ATS_SCORE: <0-100>"},
-                        {"text": "MISSING_SKILLS: skill1, skill2"},
-                        {"text": "SKILL_GAP_INTELLIGENCE:"},
-                        {"text": "- skill → how to close gap"},
-                        {"text": f"\nRESUME:\n{resume_text}"},
-                        {"text": f"\nJOB DESCRIPTION:\n{job_desc}"}
-                    ]
-                }
-            ],
-            config={
-                "max_output_tokens": 500,
-                "temperature": 0.3
-            }
-        )
-        return response.text
+Return:
+ATS_SCORE: <number>
+MISSING_KEYWORDS: <comma list>
+SKILL_GAPS: <comma list>
+SUGGESTIONS:
+- suggestion 1
+- suggestion 2
+- suggestion 3
 
-    except Exception as e:
-        return f"❌ ATS analysis failed.\n\n{e}"
+RESUME:
+{resume}
 
+JOB DESCRIPTION:
+{jd}
+"""
+    response = genai_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config={"max_output_tokens": 600}
+    )
+    return response.text
 
-# ----------------------------
-# STREAMLIT UI
-# ----------------------------
-st.set_page_config(page_title="Agentic Resume Tailor", page_icon="🤖")
-st.title("🤖 Agentic Resume Tailor (ATS-First)")
+def improve_resume(resume, jd, missing):
+    prompt = f"""
+Improve this resume to reach ATS score above 90.
 
-resume_input = st.text_area(
-    "📄 Paste your Resume",
-    height=300,
-    placeholder="Paste your full resume here"
-)
+Focus on adding these missing keywords:
+{missing}
 
-job_url = st.text_input("🔗 Job Link (optional)")
-job_desc_manual = st.text_area(
-    "📋 Job Description (optional)",
-    height=250
-)
+Keep it truthful and 1–2 pages.
 
-st.caption("💡 Paste either Job Link or Job Description")
+RESUME:
+{resume}
+
+JOB DESCRIPTION:
+{jd}
+"""
+    response = genai_client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config={"max_output_tokens": 1200}
+    )
+    return response.text
 
 # ----------------------------
-# ACTION
+# HEADER
 # ----------------------------
-if st.button("🚀 Tailor Resume"):
-    if not resume_input.strip():
-        st.error("❌ Please paste your resume")
+st.title("🚀 AI-Powered Resume ATS Optimizer")
+st.caption("Tailor your resume. Beat ATS. Land interviews.")
+
+st.markdown("---")
+
+# ----------------------------
+# INPUT SECTION (2 Columns)
+# ----------------------------
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("📄 Your Resume")
+    resume_text = st.text_area("Paste your full resume here", height=350)
+
+with col2:
+    st.subheader("🎯 Job Description")
+    job_url = st.text_input("Paste Job Link (optional)")
+    job_desc_manual = st.text_area("Or paste Job Description manually", height=300)
+
+st.markdown("---")
+
+# ----------------------------
+# MAIN ACTION BUTTON
+# ----------------------------
+if st.button("✨ Tailor Resume for This Job", use_container_width=True):
+
+    if not resume_text.strip():
+        st.warning("Please paste your resume.")
         st.stop()
 
-    # Resolve JD
-    job_desc = ""
-    if job_desc_manual.strip():
+    if not job_desc_manual.strip() and not job_url.strip():
+        st.warning("Please paste a job description or link.")
+        st.stop()
+
+    with st.spinner("Analyzing job and tailoring resume..."):
+
         job_desc = job_desc_manual
-    elif job_url.strip():
-        try:
-            scraped = firecrawl.scrape_url(job_url)
-            job_desc = scraped.get("markdown") or scraped.get("content", "")
-            if not job_desc.strip():
-                raise Exception("Empty JD")
-        except Exception:
-            st.error("❌ Failed to extract JD. Paste manually.")
-            st.stop()
-    else:
-        st.error("❌ Provide Job Link or Description")
-        st.stop()
 
-    # Resume Tailoring
-    with st.spinner("✍️ Tailoring resume..."):
-        tailored_resume = generate_tailored_resume(resume_input, job_desc)
+        if not job_desc and firecrawl and job_url:
+            try:
+                scraped = firecrawl.scrape_url(job_url)
+                job_desc = scraped.get("markdown") or scraped.get("content", "")
+            except:
+                st.error("Could not extract job description. Please paste manually.")
+                st.stop()
 
-    st.success("✅ Tailored Resume Ready")
-    st.markdown("## 📄 Tailored Resume")
-    st.markdown(tailored_resume)
+        # Generate tailored resume
+        tailored_resume = tailor_resume(resume_text, job_desc)
 
-    # ATS + Skill Gap
-    with st.spinner("📊 Analyzing ATS & Skill Gaps..."):
-        ats_output = calculate_ats_and_skill_gap(tailored_resume, job_desc)
+        # ATS Analysis
+        ats_output = ats_analysis(tailored_resume, job_desc)
+        score = extract_score(ats_output)
+
+        st.session_state.tailored_resume = tailored_resume
+        st.session_state.job_desc = job_desc
+        st.session_state.ats_output = ats_output
+        st.session_state.ats_score = score
+
+# ----------------------------
+# OUTPUT SECTION
+# ----------------------------
+if "tailored_resume" in st.session_state:
+
+    st.subheader("🤖 Tailored Resume")
+    st.text_area("Optimized Resume", st.session_state.tailored_resume, height=400)
+
+    st.download_button("📥 Download Resume", st.session_state.tailored_resume, "tailored_resume.txt")
 
     st.markdown("---")
-    st.markdown("## 📊 ATS & Skill Gap Intelligence")
-    st.markdown(ats_output)
+
+    st.subheader("📊 ATS Match Score")
+    score = st.session_state.ats_score
+
+    color = "red" if score < 60 else "orange" if score < 80 else "green"
+    st.markdown(f"<h2 style='color:{color}'>Score: {score}/100</h2>", unsafe_allow_html=True)
+
+    st.markdown("### 🧠 ATS Insights")
+    st.text_area("ATS Feedback", st.session_state.ats_output, height=200)
+
+    # Improve Button
+    if score < 90:
+        if st.button("🚀 Improve Resume to 90+ Score"):
+            with st.spinner("Boosting resume score..."):
+                missing = re.search(r"MISSING_KEYWORDS:(.*)", st.session_state.ats_output)
+                missing = missing.group(1) if missing else ""
+                improved = improve_resume(st.session_state.tailored_resume, st.session_state.job_desc, missing)
+
+                st.session_state.tailored_resume = improved
+                new_ats = ats_analysis(improved, st.session_state.job_desc)
+                st.session_state.ats_output = new_ats
+                st.session_state.ats_score = extract_score(new_ats)
+                st.rerun()

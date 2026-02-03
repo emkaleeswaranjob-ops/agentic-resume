@@ -2685,6 +2685,7 @@
 
 # ----------------------------------
 
+# 
 import streamlit as st
 import os
 from dotenv import load_dotenv
@@ -2693,7 +2694,7 @@ from firecrawl import FirecrawlApp
 import re
 
 # ----------------------------
-# PAGE CONFIG (SaaS Style)
+# PAGE CONFIG
 # ----------------------------
 st.set_page_config(page_title="AI Resume ATS Optimizer", page_icon="🚀", layout="wide")
 
@@ -2714,21 +2715,28 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
 
 if not GOOGLE_API_KEY:
-    st.error("Missing GOOGLE_API_KEY in Streamlit secrets or .env file")
+    st.error("Missing GOOGLE_API_KEY")
     st.stop()
 
 genai_client = genai.Client(api_key=GOOGLE_API_KEY, http_options={"api_version": "v1"})
-
 firecrawl = FirecrawlApp(api_key=FIRECRAWL_API_KEY) if FIRECRAWL_API_KEY else None
 
 # ----------------------------
 # HELPERS
 # ----------------------------
 def extract_score(text):
-    match = re.search(r"ATS_SCORE:\s*(\d+)", text)
-    return int(match.group(1)) if match else 0
+    match = re.search(r"ATS_SCORE:\s*(\d{1,3})", text)
+    return min(int(match.group(1)), 100) if match else 0
 
-def safe_truncate(text, limit=20000):  # Large enough to keep full resume
+def clean_resume_output(text):
+    # Remove any intro text before actual resume name line
+    lines = text.strip().split("\n")
+    for i, line in enumerate(lines):
+        if "@" in line or "|" in line or line.strip().startswith(("**", "#")):
+            return "\n".join(lines[i:])
+    return text
+
+def safe_truncate(text, limit=15000):
     return text[:limit]
 
 # ----------------------------
@@ -2736,10 +2744,14 @@ def safe_truncate(text, limit=20000):  # Large enough to keep full resume
 # ----------------------------
 def tailor_resume(resume, jd):
     prompt = f"""
-Tailor this resume to match the job description.
+Rewrite the resume to match the job description.
 
-Keep it ATS optimized, achievement-focused, and within 1–2 pages.
-Do NOT add fake experience.
+STRICT RULES:
+- Return ONLY the resume
+- No explanations
+- No greetings
+- Keep within 1–2 pages
+- Do NOT hallucinate
 
 RESUME:
 {resume}
@@ -2750,16 +2762,16 @@ JOB DESCRIPTION:
     response = genai_client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
-        config={"max_output_tokens": 2500}
+        config={"max_output_tokens": 2000, "temperature": 0.3}
     )
-    return response.text
+    return clean_resume_output(response.text)
 
 
 def ats_analysis(resume, jd):
     prompt = f"""
-You are an ATS scanner.
+You are an ATS system.
 
-Return EXACTLY in this format:
+Respond ONLY in this format:
 
 ATS_SCORE: <number>
 MISSING_KEYWORDS: <comma separated>
@@ -2778,16 +2790,17 @@ JOB DESCRIPTION:
     response = genai_client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
-        config={"max_output_tokens": 800}
+        config={"max_output_tokens": 700, "temperature": 0.2}
     )
     return response.text
 
 
 def improve_resume(resume, jd, missing):
     prompt = f"""
-Improve this resume using the missing keywords below.
+Improve this resume using the missing keywords.
 
-Keep it truthful, ATS optimized, and under 2 pages.
+Return ONLY the improved resume.
+No explanations.
 
 MISSING KEYWORDS:
 {missing}
@@ -2801,17 +2814,15 @@ JOB DESCRIPTION:
     response = genai_client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
-        config={"max_output_tokens": 2500}
+        config={"max_output_tokens": 2000, "temperature": 0.3}
     )
-    return response.text
-
+    return clean_resume_output(response.text)
 
 # ----------------------------
-# HEADER
+# UI HEADER
 # ----------------------------
 st.title("🚀 AI-Powered Resume ATS Optimizer")
 st.caption("Tailor your resume. Beat ATS. Land interviews.")
-
 st.markdown("---")
 
 # ----------------------------
@@ -2831,7 +2842,7 @@ with col2:
 st.markdown("---")
 
 # ----------------------------
-# MAIN BUTTON
+# MAIN ACTION
 # ----------------------------
 if st.button("✨ Tailor Resume for This Job", use_container_width=True):
 
@@ -2847,7 +2858,6 @@ if st.button("✨ Tailor Resume for This Job", use_container_width=True):
 
         job_desc = job_desc_manual.strip()
 
-        # Scrape job description if URL provided
         if not job_desc and firecrawl and job_url:
             try:
                 scraped = firecrawl.scrape_url(job_url)
@@ -2887,9 +2897,6 @@ if "tailored_resume" in st.session_state:
     st.markdown("### 🧠 ATS Insights")
     st.text_area("ATS Feedback", st.session_state.ats_output, height=220)
 
-    # ----------------------------
-    # IMPROVE BUTTON
-    # ----------------------------
     if score < 90:
         if st.button("🚀 Improve Resume to 90+ Score"):
             with st.spinner("Boosting resume score..."):
